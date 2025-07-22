@@ -23,7 +23,7 @@ const NewIssuePage = () => {
     });
     const [error, setError] = useState('')
 
-    console.log(error)
+    console.log(errors)
     const [isSubmitting, setSubmitting] = useState(false)
 
     async function submission(data:IssueForm) {
@@ -42,9 +42,9 @@ const NewIssuePage = () => {
   return (
     <div className='space-y-5 max-w-xl'>
 
-        {error && <Callout.Root color='red' role='alert'>
+        {(errors.description?.message || errors.title?.message) && <Callout.Root color='red' role='alert'>
             <Callout.Icon> <InfoCircledIcon /> </Callout.Icon>
-            <Callout.Text>{error}</Callout.Text>
+            <Callout.Text>An unexpected error occurred, please try again</Callout.Text>
         </Callout.Root>}
     <form className='max-w-xl space-y-3' onSubmit={handleSubmit((data) => submission(data))}>
         <TextField.Root placeholder='Title' {...register('title')}></TextField.Root>
