@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Callout, TextField, Text } from '@radix-ui/themes'
+import { Button, Callout, TextField } from '@radix-ui/themes'
 import React, { useState } from 'react'
 import SimpleMdeReact from 'react-simplemde-editor'
 import "easymde/dist/easymde.min.css";
@@ -22,6 +22,8 @@ const NewIssuePage = () => {
         resolver: zodResolver(createIssueSchema)
     });
     const [error, setError] = useState('')
+
+    console.log(error)
     const [isSubmitting, setSubmitting] = useState(false)
 
     async function submission(data:IssueForm) {
