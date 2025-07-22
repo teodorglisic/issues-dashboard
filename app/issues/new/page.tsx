@@ -1,32 +1,52 @@
 'use client'
 
-import { Button, TextField } from '@radix-ui/themes'
-import React from 'react'
+import { Button, Callout, TextField, Text } from '@radix-ui/themes'
+import React, { useState } from 'react'
 import SimpleMdeReact from 'react-simplemde-editor'
 import "easymde/dist/easymde.min.css";
 import { useForm, Controller } from 'react-hook-form';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { InfoCircledIcon } from '@radix-ui/react-icons';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { createIssueSchema } from '@/app/validationSchemas';
+import z from 'zod';
 
-
-interface IssueForm {
-    title: string,
-    description: string
-}
+type IssueForm = z.infer<typeof createIssueSchema>;
 
 const NewIssuePage = () => {
     const router = useRouter()
-    const {register, control, handleSubmit}= useForm<IssueForm>();
+    const {register, control, handleSubmit, formState: {errors}}= useForm<IssueForm>({
+        resolver: zodResolver(createIssueSchema)
+    });
+    const [error, setError] = useState('')
+
+    async function submission(data:IssueForm) {
+        try {
+            await axios.post('/api/issues', data);
+            router.push('/issues')
+        } catch (error){
+            setError('An unexpected error occurred, please try again.')
+        }
+        
+    }
 
   return (
-    <form className='max-w-xl space-y-3' onSubmit={handleSubmit(async (data) => {await axios.post('/api/issues', data); router.push('/issues')})}>
-        <TextField.Root placeholder='Title' {...register('title')}></TextField.Root>
+    <div className='space-y-5 max-w-xl'>
 
+        {error && <Callout.Root color='red' role='alert'>
+            <Callout.Icon> <InfoCircledIcon /> </Callout.Icon>
+            <Callout.Text>{error}</Callout.Text>
+        </Callout.Root>}
+    <form className='max-w-xl space-y-3' onSubmit={handleSubmit((data) => submission(data))}>
+        <TextField.Root placeholder='Title' {...register('title')}></TextField.Root>
+        {errors.title && <Text className='py-3' color='red' as='p'>{errors.title.message}</Text>}
         <Controller name='description' control={control} render={({field}) => <SimpleMdeReact {...field}/>}/>
-        
+        {errors.description && <Text className='py-3' color='red' as='p'>{errors.description.message}</Text>}
         <Button>Submit New Issue</Button>
 
     </form>
+    </div>
   )
 }
 
